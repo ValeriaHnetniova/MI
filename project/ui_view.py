@@ -42,8 +42,3 @@ class SimulationUI:
     def show(self):
         plt.show()
 
-
-# для тесту
-if __name__ == '__main__':
-    app = SimulationUI()
-    app.show()
