@@ -30,15 +30,16 @@ class SimulationUI:
             self.inputs[label] = TextBox(ax_box, f'{label}: ', initial=val)
             self.inputs[label].label.set_position((-0.3, 0.5))
 
+        self.ax_color_btn = plt.axes([panel_x - 0.02, 0.4, input_w + 0.04, 0.06])
+        self.btn_color = Button(self.ax_color_btn, 'Колір лінії', color='lightblue')
+
         self.ax_draw_btn = plt.axes([panel_x - 0.02, 0.3, input_w + 0.04, 0.08])
         self.btn_draw = Button(self.ax_draw_btn, 'Малювати', color='lightgreen')
 
         self.ax_clear_btn = plt.axes([panel_x - 0.02, 0.2, input_w + 0.04, 0.08])
         self.btn_clear = Button(self.ax_clear_btn, 'Очистити', color='salmon')
 
-        # колір за замовчуванням (поки не реалізовано вибору кольору)
         self.current_color = 'blue'
 
     def show(self):
         plt.show()
-
