@@ -42,11 +42,3 @@ class ProjectileModel:
         y_array = np.maximum(y_array, 0)
 
         return t_array, x_array, y_array
-
-#тест
-if __name__ == "__main__":
-    print("Тестування математичної моделі (Ітерація 1):")
-    test_model = ProjectileModel(v0=20, alpha_deg=45)
-    print(f"Час польоту: {test_model.get_max_time():.2f} с")
-    print(f"Дальність польоту: {test_model.get_max_distance():.2f} м")
-    print(f"Макс. висота: {test_model.get_max_height():.2f} м")
