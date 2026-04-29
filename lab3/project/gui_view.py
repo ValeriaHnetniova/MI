@@ -3,7 +3,21 @@ from tkinter import ttk
 
 
 class KnapsackAppView:
+    """
+        Клас графічного інтерфейсу користувача (GUI).
+        Відповідає виключно за відмальовування елементів керування,
+        прийом вводу та відображення результатів (Текстовий звіт + Таблиця DP).
+    """
     def __init__(self, root, controller_callback, defaults):
+        """
+            Ініціалізує всі графічні віджети (кнопки, поля вводу, таблиці)
+            та налаштовує їхню стилізацію.
+
+            Args:
+                root (ctk.CTk): Головне вікно застосунку.
+                controller_callback (function): Функція-коллбек контролера для обробки натискання кнопки.
+                defaults (dict): Стандартні дані для заповнення полів (з Варіанту 11).
+        """
         self.root = root
         self.controller_callback = controller_callback
 
@@ -106,6 +120,10 @@ class KnapsackAppView:
         hsb.pack(side="bottom", fill="x")
 
     def _on_click(self):
+        """
+            Внутрішній обробник події натискання кнопки 'Обчислити'.
+            Збирає дані з полів вводу та передає їх у контролер через коллбек.
+        """
         # Отримує індекс обраного методу
         selected_method = self.combo_method.get()
         m_idx = self.methods_list.index(selected_method)
@@ -118,12 +136,28 @@ class KnapsackAppView:
         )
 
     def update_result_text(self, text):
+        """
+            Оновлює текстове поле звіту новим текстом.
+
+            Args:
+                text (str): Відформатований звіт обчислень або повідомлення про помилку.
+        """
         self.txt_output.configure(state="normal")
         self.txt_output.delete("0.0", "end")
         self.txt_output.insert("end", text)
         self.txt_output.configure(state="disabled")
 
     def render_grid(self, matrix, W, n):
+        """
+            Відмальовує таблицю (Treeview) у графічному інтерфейсі.
+            Якщо обрано метод DP, будує матрицю станів. Для інших методів —
+            виводить заглушку з повідомленням.
+
+            Args:
+                matrix (list of lists або None): Двовимірна матриця станів (лише для DP).
+                W (int): Максимальна місткість рюкзака (визначає кількість стовпців).
+                n (int): Кількість предметів (визначає кількість рядків).
+        """
         self.tree.delete(*self.tree.get_children())
         if not matrix:
             self.tree["columns"] = ("msg",)

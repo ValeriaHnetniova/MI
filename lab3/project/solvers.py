@@ -2,6 +2,19 @@ import queue
 
 
 def brute_force_solver(W, weights, values, n):
+    """
+    Розв'язує задачу 0/1 рюкзака методом повного перебору (Brute Force).
+    Перевіряє всі можливі 2^n комбінації предметів за допомогою бітових масок.
+
+    Args:
+        W (int): Максимальна місткість рюкзака.
+        weights (list): Список ваг предметів.
+        values (list): Список цінностей предметів.
+        n (int): Кількість предметів.
+
+    Returns:
+        tuple: (max_val (int), total_w (int), best_items (list), matrix (None)).
+    """
     max_val = 0
     best_items = []
     for i in range(1 << n):
@@ -21,6 +34,20 @@ def brute_force_solver(W, weights, values, n):
 
 
 def recursive_solver(W, weights, values, n):
+    """
+    Розв'язує задачу 0/1 рюкзака методом чистої рекурсії.
+    Для кожного предмета розглядає дві гілки: предмет взято або пропущено.
+
+    Args:
+        W (int): Максимальна місткість рюкзака.
+        weights (list): Список ваг предметів.
+        values (list): Список цінностей предметів.
+        n (int): Кількість предметів.
+
+    Returns:
+        tuple: (max_val (int), total_w (int), best_items (list), matrix (None)).
+    """
+
     def solve(curr_W, index):
         if index < 0 or curr_W == 0:
             return 0, []
@@ -41,44 +68,88 @@ def recursive_solver(W, weights, values, n):
 
 
 def greedy_solver(W, weights, values, n):
+    """
+    Наближено розв'язує задачу 0/1 рюкзака жадібним алгоритмом (Greedy).
+    Предмети сортуються за спаданням питомої цінності (v/w) і додаються до заповнення рюкзака.
+
+    Args:
+        W (int): Максимальна місткість рюкзака.
+        weights (list): Список ваг предметів.
+        values (list): Список цінностей предметів.
+        n (int): Кількість предметів.
+
+    Returns:
+        tuple: (total_value (int), total_weight (int), selected_items (list), matrix (None)).
+    """
     items = [(values[i] / weights[i], weights[i], values[i], i) for i in range(n)]
     items.sort(key=lambda x: x[0], reverse=True)
-    current_w = 0
-    max_val = 0
-    best_items = []
+    total_weight = 0
+    total_value = 0
+    selected_items = []
     for _, w, v, index in items:
-        if current_w + w <= W:
-            current_w += w
-            max_val += v
-            best_items.append(index)
-    best_items.sort()
-    return max_val, current_w, best_items, None
+        if total_weight + w <= W:
+            total_weight += w
+            total_value += v
+            selected_items.append(index)
+    selected_items.sort()
+    return total_value, total_weight, selected_items, None
 
 
 def dp_solver(W, weights, values, n):
+    """
+    Розв'язує задачу 0/1 рюкзака методом динамічного програмування (DP).
+    Будує матрицю станів та відновлює набір предметів зворотним проходом (backtracking).
+
+    Args:
+        W (int): Максимальна місткість рюкзака.
+        weights (list): Список ваг предметів.
+        values (list): Список цінностей предметів.
+        n (int): Кількість предметів.
+
+    Returns:
+        tuple: (max_val (int), total_weight (int), selected_items (list), dp_matrix (list of lists)).
+               Цей метод єдиний повертає матрицю для відмальовування в GUI.
+    """
     dp = [[0 for _ in range(W + 1)] for _ in range(n + 1)]
     for i in range(1, n + 1):
         for w in range(1, W + 1):
             if weights[i - 1] <= w:
-                dp[i][w] = max(dp[i - 1][w], values[i - 1] + dp[i - 1][w - weights[i - 1]])
+                dp[i][w] = max(dp[i - 1][w], dp[i - 1][w - weights[i - 1]] + values[i - 1])
             else:
                 dp[i][w] = dp[i - 1][w]
+
     max_val = dp[n][W]
     current_W = W
-    best_items = []
+    selected_items = []
     for i in range(n, 0, -1):
-        if max_val <= 0: break
+        if max_val <= 0:
+            break
         if max_val != dp[i - 1][current_W]:
-            best_items.append(i - 1)
+            selected_items.append(i - 1)
             max_val -= values[i - 1]
             current_W -= weights[i - 1]
-    best_items.sort()
-    final_val = dp[n][W]
-    total_w = sum(weights[i] for i in best_items)
-    return final_val, total_w, best_items, dp
+
+    selected_items.sort()
+    total_weight = sum(weights[i] for i in selected_items)
+    return dp[n][W], total_weight, selected_items, dp
 
 
 def branch_and_bound_solver(W, weights, values, n):
+    """
+    Розв'язує задачу 0/1 рюкзака методом гілок і меж (Branch and Bound).
+    Використовує дерево простору станів та функцію оцінки верхньої межі (bound)
+    для відсікання неперспективних гілок.
+
+    Args:
+        W (int): Максимальна місткість рюкзака.
+        weights (list): Список ваг предметів.
+        values (list): Список цінностей предметів.
+        n (int): Кількість предметів.
+
+    Returns:
+        tuple: (max_profit (int), total_weight (int), best_items_mapped (list), matrix (None)).
+    """
+
     class Node:
         def __init__(self, level, profit, weight):
             self.level = level
@@ -107,21 +178,28 @@ def branch_and_bound_solver(W, weights, values, n):
     q.put(u)
     max_profit = 0
     best_items_mapped = []
+
     while not q.empty():
         u = q.get()
         if u.level == n - 1: continue
+
         v = Node(u.level + 1, u.profit + items[u.level + 1][2], u.weight + items[u.level + 1][1])
         v.items = u.items + [items[u.level + 1][3]]
+
         if v.weight <= W and v.profit > max_profit:
             max_profit = v.profit
             best_items_mapped = v.items
+
         v.bound = bound(v, n, W, items)
-        if v.bound > max_profit: q.put(v)
-        v_without = Node(u.level + 1, u.profit, u.weight)
-        v_without.items = u.items.copy()
-        v_without.bound = bound(v_without, n, W, items)
-        if v_without.bound > max_profit: q.put(v_without)
+        if v.bound > max_profit:
+            q.put(v)
+
+        v_no = Node(u.level + 1, u.profit, u.weight)
+        v_no.items = u.items
+        v_no.bound = bound(v_no, n, W, items)
+        if v_no.bound > max_profit:
+            q.put(v_no)
 
     best_items_mapped.sort()
-    total_w = sum(weights[i] for i in best_items_mapped)
-    return max_profit, total_w, best_items_mapped, None
+    total_weight = sum(weights[i] for i in best_items_mapped)
+    return max_profit, total_weight, best_items_mapped, None
