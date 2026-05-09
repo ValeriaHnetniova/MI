@@ -1,17 +1,25 @@
 import numpy as np
+from scipy.interpolate import lagrange
+import warnings
+
+try:
+    from numpy.exceptions import RankWarning
+except ImportError:
+    from numpy import RankWarning
+
+warnings.simplefilter('ignore', RankWarning)
 
 class MathEngine:
     @staticmethod
-    def calculate_lagrange(x_points, y_points, x_dense):
-        # ЗАГЛУШКА: Замість реального полінома повертаємо масив нулів
-        return np.zeros_like(x_dense)
+    def calculate_lagrange(x, y):
+        poly = lagrange(x, y)
+        return np.poly1d(poly.coef)
 
     @staticmethod
-    def calculate_lsm(x_points, y_points, degree, x_dense):
-        # ЗАГЛУШКА: Повертаємо нульову лінію для МНК та нулі для вузлів
-        return np.zeros_like(x_dense), np.zeros_like(x_points)
+    def calculate_lsm(x, y, degree):
+        coefs = np.polyfit(x, y, degree)
+        return np.poly1d(coefs)
 
     @staticmethod
-    def calculate_residuals(y_experimental, y_calculated):
-        # ЗАГЛУШКА: Залишки (похибки) поки що дорівнюють нулю
-        return np.zeros_like(y_experimental)
+    def calculate_residuals(y_true, y_calc):
+        return y_true - y_calc

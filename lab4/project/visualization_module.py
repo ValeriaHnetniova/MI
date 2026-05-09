@@ -3,36 +3,25 @@ import matplotlib.pyplot as plt
 
 class VisualizationModule:
     def __init__(self):
-        # Проєктування Layout: ax1 (75%), ax2 (25%)
-        self.fig, (self.ax1, self.ax2) = plt.subplots(2, 1, figsize=(10, 8), gridspec_kw={'height_ratios': [3, 1]})
-        self.fig.subplots_adjust(hspace=0.3)
+        plt.style.use('dark_background')
+        self.colors = {
+            'bg': '#0b0f19', 'grid': '#1f2937',
+            'points': '#00ffcc', 'lagrange': '#ff00ff',
+            'lsm': '#ff3366', 'stem': '#ffff00', 'text': '#e5e7eb'
+        }
 
-        # Головна зона (ax1)
-        self.ax1.set_title("Прототип: Апроксимація функцій (Лагранж та МНК)")
-        self.ax1.set_ylabel("Значення Y")
-        self.ax1.grid(True, linestyle=':', alpha=0.7)
+        self.fig = plt.figure(figsize=(13, 8), facecolor=self.colors['bg'])
+        self.fig.canvas.manager.set_window_title('Лабораторна 4: Апроксимація')
 
-        # Зона залишків (ax2)
-        self.ax2.set_title("Діаграма залишків (r_i)")
-        self.ax2.set_xlabel("Координата X")
-        self.ax2.set_ylabel("Похибка")
-        self.ax2.grid(True, linestyle=':', alpha=0.7)
-        self.ax2.axhline(0, color='black', linewidth=1)  # Базова лінія відліку
+        self.ax_main = self.fig.add_axes([0.08, 0.45, 0.7, 0.5], facecolor=self.colors['bg'])
+        self.ax_res = self.fig.add_axes([0.08, 0.15, 0.7, 0.25], facecolor=self.colors['bg'])
+        self.setup_axes()
 
-    def render_prototype(self, x, y, x_dense, y_lagrange_stub, y_lsm_stub, residuals_stub):
-
-        # 1. Точки — чорні крапки ('ko')
-        self.ax1.plot(x, y, 'ko', markersize=6, label='Експериментальні точки')
-
-        # 2. Інтерполяція Лагранжа — зелена пунктирна лінія ('g--')
-        self.ax1.plot(x_dense, y_lagrange_stub, 'g--', linewidth=1.5, label='Лагранж (Заглушка)')
-
-        # 3. МНК — товста червона суцільна лінія ('r-')
-        self.ax1.plot(x_dense, y_lsm_stub, 'r-', linewidth=2.5, label='МНК (Заглушка)')
-
-        self.ax1.legend(loc="upper right")
-
-        # 4. Штрих-графік залишків у нижній зоні
-        self.ax2.stem(x, residuals_stub, linefmt='orange', markerfmt='D', basefmt='black')
-
-        plt.show()
+    def setup_axes(self):
+        for ax in [self.ax_main, self.ax_res]:
+            ax.tick_params(colors=self.colors['text'])
+            ax.grid(True, color=self.colors['grid'], linestyle='--', alpha=0.6)
+            for spine in ax.spines.values():
+                spine.set_color(self.colors['grid'])
+        self.ax_main.set_ylabel('Y', color=self.colors['text'])
+        self.ax_res.set_ylabel('Залишки', color=self.colors['text'])
